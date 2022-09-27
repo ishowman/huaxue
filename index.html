@@ -1,0 +1,130 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>huaxue</title>
+
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+
+<script>
+
+var Container = PIXI.Container,
+Application = PIXI.Application,
+    autoDetectRenderer = PIXI.autoDetectRenderer,
+    loader = PIXI.loader,
+    resources = PIXI.loader.resources,
+    Graphics = PIXI.Graphics,
+    Text = PIXI.Text,
+
+    Sprite = PIXI.Sprite;
+    // var stage = new Container(),
+    // renderer = autoDetectRenderer(350, 664);
+    // document.body.appendChild(renderer.view);
+
+    //创建一个pixi应用
+let app = new Application(
+  // { 
+    // width: 350, 
+    // height: 664,                       
+    // antialiasing: true, 
+    // transparent: false, 
+    // resolution: 2
+  // }
+);
+let stage = app.stage;
+document.body.appendChild(app.view);
+let speed = 5
+ 
+
+    loader
+      .add([
+        "imgs/p0_bg.jpg",
+        "imgs/p4_bg_bing.jpg"
+      ])
+      .load(setup);
+
+    function setup() {
+      bg = new Container();
+      // bg.visible = false;
+
+      stage.addChild(bg);
+
+
+      var cat = new Sprite(resources["imgs/p0_bg.jpg"].texture);
+      cat.width = 310;
+      cat.height = 664;
+      bg.addChild(cat);
+      // stage.addChild(cat);
+
+      gameStartScene = new Container();
+      var court = new Sprite(resources[`imgs/p4_bg_bing.jpg`].texture)
+      court.width = 310;
+      court.height = 1200;
+      court.y = -600
+      gameStartScene.addChild(court)
+      // gameStartScene.visible = false;
+  stage.addChild(gameStartScene);
+  //Make the `gameOver` scene invisible when the game first starts
+  // message = new Text(
+  //   "Ready? Go!", 
+  //   {font: "32px Futura", fill: "white"}
+  // );
+  // message.x = stage.width / 2 - 50;
+  // message.y = stage.height / 2 - 32;
+  // gameStartScene.addChild(message);
+
+      // renderPoint(gameStartScene)
+
+      const point = new Graphics();
+point.beginFill(0x0bef47)
+point.drawCircle(stage.width/2, 550, 25)
+point.endFill()
+point.interactive = true;//响应交互
+point.buttonMode = true;//鼠标变手型
+point.on("pointerdown", (event) => {
+  // court.y += speed
+    console.log("graphics", event, court.y)
+    // gameStartScene.visible = !gameStartScene.visible 
+    // renderer.render(stage); // 通过 render 方法更新视图
+
+})
+stage.addChild(point)
+
+
+      app.ticker.add(delta => {
+        // console.log('ticker', delta)
+        // court.y -= 10
+        court.y += speed
+
+        if(court.y > 0) {
+          court.y = -600
+        }
+
+      })
+
+// requestAnimationFrame(() => {
+  // renderer.render(stage);
+
+// })
+
+    }
+
+    function renderPoint(scene) {
+      const point = new Graphics();
+point.beginFill(0x0bef47)
+point.drawCircle(stage.width/2, 550, 25)
+point.endFill()
+point.interactive = true;//响应交互
+point.buttonMode = true;//鼠标变手型
+point.on("pointerdown", (event) => {
+    console.log("graphics", event)
+    // scene.visible = !scene.visible
+    // gameScene.visible = true;
+    gameStartScene.visible = !gameStartScene.visible 
+    // renderer.render(stage); // 通过 render 方法更新视图
+
+})
+stage.addChild(point)
+    }
+
+
+</script>
