@@ -3,37 +3,38 @@
 <title>huaxue</title>
 
 <body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+  <span id="hp"></span>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
 
-<script>
+  <script>
 
-var Container = PIXI.Container,
-Application = PIXI.Application,
-    autoDetectRenderer = PIXI.autoDetectRenderer,
-    loader = PIXI.loader,
-    resources = PIXI.loader.resources,
-    Graphics = PIXI.Graphics,
-    Text = PIXI.Text,
+    var Container = PIXI.Container,
+      Application = PIXI.Application,
+      autoDetectRenderer = PIXI.autoDetectRenderer,
+      loader = PIXI.loader,
+      resources = PIXI.loader.resources,
+      Graphics = PIXI.Graphics,
+      Text = PIXI.Text,
 
-    Sprite = PIXI.Sprite;
+      Sprite = PIXI.Sprite;
     // var stage = new Container(),
     // renderer = autoDetectRenderer(350, 664);
     // document.body.appendChild(renderer.view);
 
     //创建一个pixi应用
-let app = new Application(
-  // { 
-    // width: 350, 
-    // height: 664,                       
-    // antialiasing: true, 
-    // transparent: false, 
-    // resolution: 2
-  // }
-);
-let stage = app.stage;
-document.body.appendChild(app.view);
-let speed = 5
- 
+    let app = new Application(
+      // { 
+      // width: 350, 
+      // height: 664,                       
+      // antialiasing: true, 
+      // transparent: false, 
+      // resolution: 2
+      // }
+    );
+    let stage = app.stage;
+    document.body.appendChild(app.view);
+    let speed = 5
+
 
     loader
       .add([
@@ -43,6 +44,11 @@ let speed = 5
       .load(setup);
 
     function setup() {
+      numberOfBlobs = 2; //初始化最大敌车数量
+      score = 0; //初始化分数
+      hp = 5; //初始化HP
+      document.getElementById('hp').innerHTML = String(hp);//将HP写入元素
+
       bg = new Container();
       // bg.visible = false;
 
@@ -62,32 +68,48 @@ let speed = 5
       court.y = -600
       gameStartScene.addChild(court)
       // gameStartScene.visible = false;
-  stage.addChild(gameStartScene);
-  //Make the `gameOver` scene invisible when the game first starts
-  // message = new Text(
-  //   "Ready? Go!", 
-  //   {font: "32px Futura", fill: "white"}
-  // );
-  // message.x = stage.width / 2 - 50;
-  // message.y = stage.height / 2 - 32;
-  // gameStartScene.addChild(message);
+      stage.addChild(gameStartScene);
+      //Make the `gameOver` scene invisible when the game first starts
+      // message = new Text(
+      //   "Ready? Go!", 
+      //   {font: "32px Futura", fill: "white"}
+      // );
+      // message.x = stage.width / 2 - 50;
+      // message.y = stage.height / 2 - 32;
+      // gameStartScene.addChild(message);
 
       // renderPoint(gameStartScene)
 
       const point = new Graphics();
-point.beginFill(0x0bef47)
-point.drawCircle(stage.width/2, 550, 25)
-point.endFill()
-point.interactive = true;//响应交互
-point.buttonMode = true;//鼠标变手型
-point.on("pointerdown", (event) => {
-  // court.y += speed
-    console.log("graphics", event, court.y)
-    // gameStartScene.visible = !gameStartScene.visible 
-    // renderer.render(stage); // 通过 render 方法更新视图
+      point.beginFill(0x0bef47)
+      point.drawCircle(stage.width / 2, 550, 25)
+      point.endFill()
+      point.interactive = true;//响应交互
+      point.buttonMode = true;//鼠标变手型
+      point.on("pointerdown", (event) => {
+        // court.y += speed
+        console.log("graphics", event, court.y)
+        // gameStartScene.visible = !gameStartScene.visible 
+        // renderer.render(stage); // 通过 render 方法更新视图
 
-})
-stage.addChild(point)
+      })
+      stage.addChild(point)
+
+      app.renderer.plugins.interaction.on("mousedown", (event) => {
+        dragFlag = true
+        startPoint = { x: event.data.global.x, y: event.data.global.y }
+        console.log('startPoint', startPoint)
+      })
+
+      app.renderer.plugins.interaction.on("mousemove", (event) => {
+        if (dragFlag) {
+          const dx = event.data.global.x - startPoint.x;
+          // const dy = event.data.global.y - startPoint.y;
+          point.x += dx;
+          // point.y += dy;
+          startPoint = { x: event.data.global.x, y: event.data.global.y }
+        }
+      })
 
 
       app.ticker.add(delta => {
@@ -95,36 +117,87 @@ stage.addChild(point)
         // court.y -= 10
         court.y += speed
 
-        if(court.y > 0) {
+        if (court.y > 0) {
           court.y = -600
         }
 
       })
 
-// requestAnimationFrame(() => {
-  // renderer.render(stage);
+      // requestAnimationFrame(() => {
+      // renderer.render(stage);
 
-// })
+      // })
 
     }
 
     function renderPoint(scene) {
       const point = new Graphics();
-point.beginFill(0x0bef47)
-point.drawCircle(stage.width/2, 550, 25)
-point.endFill()
-point.interactive = true;//响应交互
-point.buttonMode = true;//鼠标变手型
-point.on("pointerdown", (event) => {
-    console.log("graphics", event)
-    // scene.visible = !scene.visible
-    // gameScene.visible = true;
-    gameStartScene.visible = !gameStartScene.visible 
-    // renderer.render(stage); // 通过 render 方法更新视图
+      point.beginFill(0x0bef47)
+      point.drawCircle(stage.width / 2, 550, 25)
+      point.endFill()
+      point.interactive = true;//响应交互
+      point.buttonMode = true;//鼠标变手型
+      point.on("pointerdown", (event) => {
+        console.log("graphics", event)
+        // scene.visible = !scene.visible
+        // gameScene.visible = true;
+        gameStartScene.visible = !gameStartScene.visible
+        // renderer.render(stage); // 通过 render 方法更新视图
 
-})
-stage.addChild(point)
+      })
+      stage.addChild(point)
     }
 
 
-</script>
+    /* utils */
+
+    //碰撞检测
+    function hitTestRectangle(r1, r2) {
+
+      //设置需要的变量
+      let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+      //初始化是否碰撞
+      hit = false;
+
+      //寻找精灵中心点
+      r1.centerX = r1.x + r1.width / 2;
+      r1.centerY = r1.y + r1.height / 2;
+      r2.centerX = r2.x + r2.width / 2;
+      r2.centerY = r2.y + r2.height / 2;
+
+      //计算精灵一半的宽度和高度
+      r1.halfWidth = r1.width / 2;
+      r1.halfHeight = r1.height / 2;
+      r2.halfWidth = r2.width / 2;
+      r2.halfHeight = r2.height / 2;
+
+      //计算相互之间的距离
+      vx = r1.centerX - r2.centerX;
+      vy = r1.centerY - r2.centerY;
+
+      //计算xy重叠的数值
+      combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+      combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+      //检查x轴是否充电
+      if (Math.abs(vx) < combinedHalfWidths && Math.abs(vy) < combinedHalfHeights) {
+
+        //如果是则判断为碰撞
+        hit = true;
+
+      } else {
+
+        //x轴没有碰撞
+        hit = false;
+      }
+
+      //传是否碰撞
+      return hit;
+    };
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+  </script>
