@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>赛车</title>
-<body>
+<body style="font-size: 30px;">
   <p><span>分数：</span><span id="score"></span></p>
   <p><span>HP：</span><span id="hp"></span></p>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
@@ -21,10 +21,11 @@ let Application = PIXI.Application,
 //创建一个pixi应用
 let app = new Application({ 
     width: 240, 
-    height: 120,                       
+    height: 120, 
+    // resizeTo: window,                      
     antialiasing: true, 
     transparent: false, 
-    resolution: 2
+    resolution: 4
   }
 );
 let dragFlag = false;
@@ -93,12 +94,12 @@ function setup() {
   gameOverScene.addChild(message);
 
   //
-  app.renderer.plugins.interaction.on("mousedown", (event) => {
+  app.renderer.plugins.interaction.on("touchstart", (event) => {
         dragFlag = true
         startPoint = { x: event.data.global.x, y: event.data.global.y }
       })
 
-      app.renderer.plugins.interaction.on("mousemove", (event) => {
+      app.renderer.plugins.interaction.on("touchmove", (event) => {
         if (dragFlag) {
           // const dx = event.data.global.x - startPoint.x;
           const dy = event.data.global.y - startPoint.y;
@@ -108,7 +109,7 @@ function setup() {
         }
       })
 
-      app.renderer.plugins.interaction.on("mouseup", (event) => {
+      app.renderer.plugins.interaction.on("touchend", (event) => {
         dragFlag = false
       })
 
