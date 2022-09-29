@@ -1,0 +1,367 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>赛车</title>
+<body>
+  <p><span>分数：</span><span id="score"></span></p>
+  <p><span>HP：</span><span id="hp"></span></p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
+<script>
+
+//别名
+let Application = PIXI.Application,
+    Container = PIXI.Container,
+    loader = PIXI.loader,
+    resources = PIXI.loader.resources,
+    Graphics = PIXI.Graphics,
+    TextureCache = PIXI.utils.TextureCache,
+    Sprite = PIXI.Sprite,
+    Text = PIXI.Text,
+    TextStyle = PIXI.TextStyle;
+
+//创建一个pixi应用
+let app = new Application({ 
+    width: 240, 
+    height: 120,                       
+    antialiasing: true, 
+    transparent: false, 
+    resolution: 2
+  }
+);
+let dragFlag = false;
+    let startPoint = {}
+
+
+//将pixi插入文档
+document.body.appendChild(app.view);
+//加载素材图片
+loader
+  .add("img/bg.png")
+  .add("img/boom.png")
+  .add("img/emcar.png")
+  .add("img/mycar.png")
+  .load(setup);
+//设置要用到的变量
+let state,gameScene,gameOverScene,message,bg,mycarSprite,blobs,numberOfBlobs,score,hp;
+function setup() {
+  numberOfBlobs = 2;//初始化最大敌车数量
+  score = 0;//初始化分数
+  hp = 5;//初始化HP
+  document.getElementById('hp').innerHTML = String(hp);//将HP写入元素
+  //设置游戏场景容器
+  gameScene = new Container();
+  app.stage.addChild(gameScene);
+  //设置背景
+  bg = new Sprite(resources["img/bg.png"].texture);
+  bg.width = 480;
+  bg.height = 120;
+  gameScene.addChild(bg);
+
+  //设置自己的车
+  mycarSprite=new Sprite(resources["img/mycar.png"].texture);
+  mycarSprite.position.set(2,5);//自己的车的初始位置
+  mycarSprite.width = 18;//自己的车宽度
+  mycarSprite.height = 11;//高度
+  mycarSprite.vy = 0;//y轴加速度
+  mycarSprite.vx = 0;//x轴加速度
+  mycarSprite.invl = 0;//初始化无敌时间
+  gameScene.addChild(mycarSprite);
+
+  console.log('mycarSprite.y', mycarSprite.y)
+
+  //一个存地方车辆的数组
+  blobs = [];
+
+  //创建一个游戏结束的场景
+  gameOverScene = new Container();
+  app.stage.addChild(gameOverScene);
+
+  //先让游戏结束场景隐藏
+  gameOverScene.visible = false;
+
+  //设置一个默认字体
+  let style = new TextStyle({
+    "wordWrap": true,
+    "align": "center",
+    "fill": "white",
+    "fontSize": 14
+  });
+  message = new Text("", style);
+  message.y = app.stage.height / 2 - 32;
+  message.x = app.stage.width / 4;
+  //字体中心点用于居中
+  message.anchor.set(0.5,0.5)
+  gameOverScene.addChild(message);
+
+  //
+  app.renderer.plugins.interaction.on("mousedown", (event) => {
+        dragFlag = true
+        startPoint = { x: event.data.global.x, y: event.data.global.y }
+      })
+
+      app.renderer.plugins.interaction.on("mousemove", (event) => {
+        if (dragFlag) {
+          // const dx = event.data.global.x - startPoint.x;
+          const dy = event.data.global.y - startPoint.y;
+          // mycarSprite.x += dx;
+          mycarSprite.y += dy;
+          startPoint = { x: event.data.global.x, y: event.data.global.y }
+        }
+      })
+
+      app.renderer.plugins.interaction.on("mouseup", (event) => {
+        dragFlag = false
+      })
+
+
+  state = play;
+  app.ticker.add(delta => gameLoop(delta));
+}
+function creatEMCar(){
+  //设置敌人
+  //根据最大敌车数创建车子
+  for (let i = 0; i < numberOfBlobs-blobs.length; i++) {
+
+    //创建敌车
+    let blob = new Sprite(resources["img/emcar.png"].texture);
+    blob.width = 18;
+    blob.height = 11;
+    let EMCarIsHit = true;
+    while(EMCarIsHit){
+      //随机车子x坐标在画布外
+      let x = randomInt(250, 500);
+
+      //随机y坐标在画布范围内
+      let y = randomInt(2, app.stage.height - 2 - blob.height);
+
+      //设置车辆位置
+      blob.x = x;
+      blob.y = y;
+
+      //检测车辆位置是否有重叠
+      EMCarIsHit = checkEMCarPositionHit(blob);
+    }
+
+    //将车子加入数组
+    blobs.push(blob);
+
+    //渲染
+    gameScene.addChild(blob);
+  }
+}
+//检查生成的地方车辆是否有重叠
+function checkEMCarPositionHit(blob){
+  for(var i=0;i<blobs.length;i++){
+    if(hitTestRectangle(blob,blobs[i])){
+      return true;
+      break;
+    }
+  }
+}
+function gameLoop(delta){
+  //更新游戏场景:
+  state(delta);
+}
+function play(delta) {
+  //背景移动
+  bg.x -= 10;
+  if(bg.x<-230){
+    bg.x = 0;
+  }
+  //移动赛车
+  mycarSprite.x += mycarSprite.vx;
+  mycarSprite.y += mycarSprite.vy;
+  if(mycarSprite.invl>0){
+    mycarSprite.invl --;
+  }
+  //判断车辆是否超出画布
+  contain(mycarSprite, {x: 0, y: 2, width: 240, height: 118});
+  //设置敌人
+  creatEMCar();
+  let explorerHit = false;
+  //移动敌人
+  blobs.forEach(function(blob) {
+
+    //移动地方车辆
+    blob.x -= 5;
+
+    //如果和我方车辆发生碰撞
+    if(hitTestRectangle(mycarSprite, blob)) {
+      explorerHit = true;
+    }
+  });
+  //去除已经行驶到画布外的敌军车辆
+  removeEmCar();
+  //加分
+  score += 1;
+  document.getElementById('score').innerHTML = String(score);
+  //如果分数大于2000则每1000分场景车辆+1，最多八辆
+  if(score>2000){
+    numberOfBlobs = Math.floor(score/1000);
+    if(numberOfBlobs>8){
+      numberOfBlobs = 8;
+    }
+  }
+  //如果发生碰撞且在无敌时间之外
+  if(explorerHit&&mycarSprite.invl===0) {
+
+    //车子图片变更为爆炸
+    mycarSprite.texture = resources["img/boom.png"].texture;
+    //减血
+    hp --;
+    document.getElementById('hp').innerHTML = String(hp);
+    //判断是否血量归零
+    if(hp<1){
+      //抛出游戏结束
+      state = end;
+      message.text = "你的车炸了！刷新重来";
+    }
+    mycarSprite.invl = 30//设置无敌时间
+
+  }else if(mycarSprite.invl<=0){//如果不在无敌时间内
+    //车辆贴图变回去
+    mycarSprite.texture = resources["img/mycar.png"].texture;
+  } else {//其他情况
+    mycarSprite.texture = resources["img/mycar.png"].texture;
+  }
+}
+//移除已经行驶到画布外围的敌方车辆
+function removeEmCar(){
+  for(var i=0;i<blobs.length;i++){
+    if(blobs[i].x<-50){
+      //从数组删除
+      blobs.splice(i, 1);
+      //从场景删除
+      gameScene.removeChildAt(i+2);
+    }
+  }
+}
+//按键方法
+function keyboard(keyCode) {
+  var key = {};
+  key.code = keyCode;
+  key.isDown = false;
+  key.isUp = true;
+  key.press = undefined;
+  key.release = undefined;
+
+  key.downHandler = function(event) {
+    if (event.keyCode === key.code) {
+      if (key.isUp && key.press) key.press();
+      key.isDown = true;
+      key.isUp = false;
+    }
+    event.preventDefault();
+  };
+
+  key.upHandler = function(event) {
+    if (event.keyCode === key.code) {
+      if (key.isDown && key.release) key.release();
+      key.isDown = false;
+      key.isUp = true;
+    }
+    event.preventDefault();
+  };
+
+  window.addEventListener(
+    "keydown", key.downHandler.bind(key), false
+  );
+  window.addEventListener(
+    "keyup", key.upHandler.bind(key), false
+  );
+  return key;
+}
+//判断是否超出画布
+function contain(sprite, container) {
+
+  let collision = undefined;
+
+  //Left
+  if (sprite.x < container.x) {
+    sprite.x = container.x;
+    collision = "left";
+  }
+
+  //Top
+  if (sprite.y < container.y) {
+    sprite.y = container.y;
+    collision = "top";
+  }
+
+  //Right
+  if (sprite.x + sprite.width > container.width) {
+    sprite.x = container.width - sprite.width;
+    collision = "right";
+  }
+
+  //Bottom
+  if (sprite.y + sprite.height > container.height) {
+    sprite.y = container.height - sprite.height;
+    collision = "bottom";
+  }
+
+  return collision;
+}
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+//碰撞检测
+function hitTestRectangle(r1, r2) {
+
+  //设置需要的变量
+  let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+  //初始化是否碰撞
+  hit = false;
+
+  //寻找精灵中心点
+  r1.centerX = r1.x + r1.width / 2; 
+  r1.centerY = r1.y + r1.height / 2; 
+  r2.centerX = r2.x + r2.width / 2; 
+  r2.centerY = r2.y + r2.height / 2; 
+
+  //计算精灵一半的宽度和高度
+  r1.halfWidth = r1.width / 2;
+  r1.halfHeight = r1.height / 2;
+  r2.halfWidth = r2.width / 2;
+  r2.halfHeight = r2.height / 2;
+
+  //计算相互之间的距离
+  vx = r1.centerX - r2.centerX;
+  vy = r1.centerY - r2.centerY;
+
+  //计算xy重叠的数值
+  combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+  combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+  //检查x轴是否充电
+  if (Math.abs(vx) < combinedHalfWidths) {
+
+    //再检查y轴
+    if (Math.abs(vy) < combinedHalfHeights) {
+
+      //如果是则判断为碰撞
+      hit = true;
+    } else {
+
+      //否则为没碰撞
+      hit = false;
+    }
+  } else {
+
+    //x轴没有碰撞
+    hit = false;
+  }
+
+  //传是否碰撞
+  return hit;
+};
+//游戏结束显示游戏结束场景，隐藏游戏场景
+function end() {
+  gameScene.visible = false;
+  gameOverScene.visible = true;
+}
+
+</script>
+</body>
+
+
