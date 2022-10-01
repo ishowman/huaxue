@@ -1,11 +1,17 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>赛车</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+</style>
 
 <body style="font-size: 30px;">
   <p><span>分数：</span><span id="score"></span></p>
   <p><span>HP：</span><span id="hp"></span></p>
-  <p id="hit-records"></p>
+  <!-- <p id="hit-records"></p> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
   <script>
 
@@ -19,21 +25,24 @@
       Sprite = PIXI.Sprite,
       Text = PIXI.Text,
       TextStyle = PIXI.TextStyle;
-
+    let canvasWidth = window.innerWidth,
+    canvasHeight = 1500;
+    console.log('canvasWidth',canvasWidth)
     //创建一个pixi应用
     let app = new Application({
-      width: 240,
-      height: 120,
+      width: canvasWidth+20,
+      height: canvasHeight,
       // resizeTo: window,                      
       antialiasing: true,
       transparent: false,
-      resolution: 4
+      resolution: 1
     }
     );
     let dragFlag = false;
     let startPoint = {}
     let hitRecords = []
     let lastHit = ''
+    let speed = 10
 
 
     //将pixi插入文档
@@ -58,16 +67,17 @@
       app.stage.addChild(gameScene);
       //设置背景
       bg = new Sprite(resources["img/bg.png"].texture);
-      bg.width = 480;
-      bg.height = 120;
+      bg.width = canvasWidth;
+      bg.height = canvasHeight*2;
+      bg.y = -1*canvasHeight
       gameScene.addChild(bg);
 
       //设置自己的车
       mycarSprite = new Sprite(resources["img/myHorse.png"].texture);
-      mycarSprite.position.set(80, 5);//自己的车的初始位置
-      mycarSprite.width = 36;//自己的车宽度
-      mycarSprite.height = 80;//高度
-      mycarSprite.rotation = 1.5
+      mycarSprite.width = 150;//自己的车宽度
+      mycarSprite.height = 320;//高度
+
+      mycarSprite.position.set( (canvasWidth-mycarSprite.width)/2, canvasHeight-mycarSprite.height);//自己的车的初始位置
       mycarSprite.vy = 0;//y轴加速度
       mycarSprite.vx = 0;//x轴加速度
       mycarSprite.invl = 0;//初始化无敌时间
@@ -89,7 +99,7 @@
         "wordWrap": true,
         "align": "center",
         "fill": "white",
-        "fontSize": 14
+        "fontSize": 50
       });
       message = new Text("", style);
       message.y = app.stage.height / 2 - 32;
@@ -106,10 +116,10 @@
 
       app.renderer.plugins.interaction.on("touchmove", (event) => {
         if (dragFlag) {
-          // const dx = event.data.global.x - startPoint.x;
-          const dy = event.data.global.y - startPoint.y;
-          // mycarSprite.x += dx;
-          mycarSprite.y += dy;
+          const dx = event.data.global.x - startPoint.x;
+          // const dy = event.data.global.y - startPoint.y;
+          mycarSprite.x += dx;
+          // mycarSprite.y += dy;
           startPoint = { x: event.data.global.x, y: event.data.global.y }
         }
       })
@@ -135,16 +145,19 @@
       for (let i = 0; i < numberOfBlobs - blobs.length; i++) {
 
         //创建敌车
-        let blob = new Sprite(resources[blobsArr[randomInt(0, 2)]].texture);
-        blob.width = 18;
-        blob.height = 11;
+        let blob = new Sprite(resources[blobsArr[randomInt(0, 4)]].texture);
+        blob.width = 100;
+        blob.height = 100;
         let EMCarIsHit = true;
         while (EMCarIsHit) {
           //随机车子x坐标在画布外
-          let x = randomInt(250, 500);
+          // let x = randomInt(250, 500);
+          let y = randomInt(-(canvasHeight+speed), -1.5*canvasHeight)
 
           //随机y坐标在画布范围内
-          let y = randomInt(2, app.stage.height - 2 - blob.height);
+          // let y = randomInt(2, app.stage.height - 2 - blob.height);
+          let x = randomInt(2, app.stage.width - 2 - blob.width);
+
 
           //设置车辆位置
           blob.x = x;
@@ -176,9 +189,9 @@
     }
     function play(delta) {
       //背景移动
-      bg.x -= 5;
-      if (bg.x < -235) {
-        bg.x = 0;
+      bg.y += 1;
+      if (bg.y>= speed) {
+        bg.y = -1*canvasHeight;
       }
       //移动赛车
       mycarSprite.x += mycarSprite.vx;
@@ -187,7 +200,7 @@
         mycarSprite.invl--;
       }
       //判断车辆是否超出画布
-      contain(mycarSprite, { x: 0, y: 2, width: 240, height: 118 });
+      keepInScreen(mycarSprite, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
       creatEMCar();
       let explorerHit = false;
@@ -195,7 +208,9 @@
       blobs.forEach(function (blob) {
 
         //移动地方车辆
-        blob.x -= 5;
+        // blob.x -= 5;
+        blob.y += speed;
+
 
         //如果和我方车辆发生碰撞
         if (hitTestRectangle(mycarSprite, blob)) {
@@ -230,7 +245,7 @@
         hitRecords.push(
           lastHit
         )
-        document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
+        // document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
 
 
        
@@ -253,7 +268,9 @@
     //移除已经行驶到画布外围的敌方车辆
     function removeEmCar() {
       for (var i = 0; i < blobs.length; i++) {
-        if (blobs[i].x < -50) {
+        // if (blobs[i].x < -50) {
+        if (blobs[i].y > canvasHeight) {
+
           //从数组删除
           blobs.splice(i, 1);
           //从场景删除
@@ -262,7 +279,7 @@
       }
     }
     //判断是否超出画布
-    function contain(sprite, container) {
+    function keepInScreen(sprite, container) {
 
       let collision = undefined;
 
