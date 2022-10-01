@@ -32,7 +32,9 @@
     );
     let dragFlag = false;
     let startPoint = {}
-let hitRecords = []
+    let hitRecords = []
+    let lastHit = ''
+
 
     //将pixi插入文档
     document.body.appendChild(app.view);
@@ -125,15 +127,15 @@ let hitRecords = []
     function creatEMCar() {
       //设置敌人
       //根据最大敌车数创建车子
-      const blobsArr = [      
+      const blobsArr = [
         "img/emcar.png",
-      "img/cat.png",
-      "img/blob.png"
-]
+        "img/cat.png",
+        "img/blob.png"
+      ]
       for (let i = 0; i < numberOfBlobs - blobs.length; i++) {
 
         //创建敌车
-        let blob = new Sprite(resources[blobsArr[randomInt(0,2)]].texture);
+        let blob = new Sprite(resources[blobsArr[randomInt(0, 2)]].texture);
         blob.width = 18;
         blob.height = 11;
         let EMCarIsHit = true;
@@ -214,8 +216,15 @@ let hitRecords = []
       }
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && mycarSprite.invl === 0) {
-        if(lastHit === "img/cat.png") {
-          hp+=1
+        if (lastHit === "img/cat.png") {
+          hp += 1
+          document.getElementById('hp').innerHTML = String(hp);
+        } else {
+           //车子图片变更为爆炸
+          // mycarSprite.texture = resources["img/boom.png"].texture;
+          //减血
+          hp--;
+          document.getElementById('hp').innerHTML = String(hp);
         }
         hitRecords.push(
           lastHit
@@ -223,11 +232,7 @@ let hitRecords = []
         document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
 
 
-        //车子图片变更为爆炸
-        // mycarSprite.texture = resources["img/boom.png"].texture;
-        //减血
-        hp--;
-        document.getElementById('hp').innerHTML = String(hp);
+       
         //判断是否血量归零
         if (hp < 1) {
           //抛出游戏结束
@@ -236,7 +241,7 @@ let hitRecords = []
         }
         mycarSprite.invl = 30//设置无敌时间
 
-      } 
+      }
       // else if (mycarSprite.invl <= 0) {//如果不在无敌时间内
       //   //车辆贴图变回去
       //   mycarSprite.texture = resources["img/mycar.png"].texture;
@@ -289,7 +294,6 @@ let hitRecords = []
     function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    let lastHit = ''
     //碰撞检测
     function hitTestRectangle(r1, r2) {
 
@@ -338,7 +342,7 @@ let hitRecords = []
         hit = false;
       }
 
-      if(hit) {
+      if (hit) {
         // hitRecords.push(
         //   r2.texture.textureCacheIds[0]
         // )
