@@ -41,12 +41,10 @@
     //加载素材图片
     loader
       .add("img/bg.png")
-      .add("img/boom.png")
-      .add("img/emcar.png")
-      .add("img/cat.png")
-      .add("img/blob.png")
-
-      .add("img/mycar.png")
+      .add("img/coin.png")
+      .add("img/stone.png")
+      .add("img/prize.png")
+      .add("img/myHorse.png")
       .load(setup);
     //设置要用到的变量
     let state, gameScene, gameOverScene, message, bg, mycarSprite, blobs, numberOfBlobs, score, hp;
@@ -65,16 +63,15 @@
       gameScene.addChild(bg);
 
       //设置自己的车
-      mycarSprite = new Sprite(resources["img/mycar.png"].texture);
+      mycarSprite = new Sprite(resources["img/myHorse.png"].texture);
       mycarSprite.position.set(2, 5);//自己的车的初始位置
-      mycarSprite.width = 18;//自己的车宽度
-      mycarSprite.height = 11;//高度
+      mycarSprite.width = 36;//自己的车宽度
+      mycarSprite.height = 80;//高度
       mycarSprite.vy = 0;//y轴加速度
       mycarSprite.vx = 0;//x轴加速度
       mycarSprite.invl = 0;//初始化无敌时间
       gameScene.addChild(mycarSprite);
 
-      console.log('mycarSprite.y', mycarSprite.y)
 
       //一个存地方车辆的数组
       blobs = [];
@@ -126,11 +123,13 @@
     }
     function creatEMCar() {
       //设置敌人
-      //根据最大敌车数创建车子
+      //根据最大 blob 数生成：理论上石头概率接近 1/5
       const blobsArr = [
-        "img/emcar.png",
-        "img/cat.png",
-        "img/blob.png"
+        "img/stone.png",
+        "img/coin.png",
+        "img/prize.png",
+        "img/coin.png",
+        "img/prize.png",
       ]
       for (let i = 0; i < numberOfBlobs - blobs.length; i++) {
 
@@ -176,8 +175,8 @@
     }
     function play(delta) {
       //背景移动
-      bg.x -= 10;
-      if (bg.x < -230) {
+      bg.x -= 5;
+      if (bg.x < -235) {
         bg.x = 0;
       }
       //移动赛车
@@ -205,22 +204,23 @@
       //去除已经行驶到画布外的敌军车辆
       removeEmCar();
       //加分
-      score += 1;
+      // score += 1;
       document.getElementById('score').innerHTML = String(score);
-      //如果分数大于2000则每1000分场景车辆+1，最多八辆
-      if (score > 2000) {
-        numberOfBlobs = Math.floor(score / 1000);
-        if (numberOfBlobs > 8) {
-          numberOfBlobs = 8;
+      //如果分数大于200则每1000分场景车辆+1，最多八辆
+      if (score > 200) {
+        numberOfBlobs = Math.floor(score / 100);
+        if (numberOfBlobs > 6) {
+          numberOfBlobs = 6;
         }
       }
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && mycarSprite.invl === 0) {
-        if (lastHit === "img/cat.png") {
-          hp += 1
-          document.getElementById('hp').innerHTML = String(hp);
+        if (["img/coin.png", "img/prize.png"].includes(lastHit)) {
+          // hp -= 1
+          // document.getElementById('hp').innerHTML = String(hp);
+          score += 100
         } else {
-           //车子图片变更为爆炸
+          //车子图片变更为爆炸
           // mycarSprite.texture = resources["img/boom.png"].texture;
           //减血
           hp--;
