@@ -11,7 +11,6 @@
 <body style="font-size: 30px;">
   <p><span>分数：</span><span id="score"></span></p>
   <p><span>HP：</span><span id="hp"></span></p>
-  <!-- <p id="hit-records"></p> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
   <script>
 
@@ -81,6 +80,30 @@
       mycarSprite.vy = 0;//y轴加速度
       mycarSprite.vx = 0;//x轴加速度
       mycarSprite.invl = 0;//初始化无敌时间
+      // let horse = PIXI.Sprite.from('img/myHorse.png');
+      mycarSprite.interactive = true;
+      // mycarSprite.buttonMode = true;
+
+      mycarSprite.on("touchstart", (event) => {
+        dragFlag = true
+        startPoint = { x: event.data.global.x, y: event.data.global.y }
+      })
+
+      mycarSprite.on("touchmove", (event) => {
+        if (dragFlag) {
+          const dx = event.data.global.x - startPoint.x;
+          // const dy = event.data.global.y - startPoint.y;
+          mycarSprite.x += dx;
+          // mycarSprite.y += dy;
+          startPoint = { x: event.data.global.x, y: event.data.global.y }
+        }
+      })
+
+      mycarSprite.on("touchend", (event) => {
+        dragFlag = false
+      })
+
+      // mycarSprite.on('pointerdown', (event) => { alert('clicked!'); });
       gameScene.addChild(mycarSprite);
 
 
@@ -109,24 +132,24 @@
       gameOverScene.addChild(message);
 
       //
-      app.renderer.plugins.interaction.on("touchstart", (event) => {
-        dragFlag = true
-        startPoint = { x: event.data.global.x, y: event.data.global.y }
-      })
+      // app.renderer.plugins.interaction.on("touchstart", (event) => {
+      //   dragFlag = true
+      //   startPoint = { x: event.data.global.x, y: event.data.global.y }
+      // })
 
-      app.renderer.plugins.interaction.on("touchmove", (event) => {
-        if (dragFlag) {
-          const dx = event.data.global.x - startPoint.x;
-          // const dy = event.data.global.y - startPoint.y;
-          mycarSprite.x += dx;
-          // mycarSprite.y += dy;
-          startPoint = { x: event.data.global.x, y: event.data.global.y }
-        }
-      })
+      // app.renderer.plugins.interaction.on("touchmove", (event) => {
+      //   if (dragFlag) {
+      //     const dx = event.data.global.x - startPoint.x;
+      //     // const dy = event.data.global.y - startPoint.y;
+      //     mycarSprite.x += dx;
+      //     // mycarSprite.y += dy;
+      //     startPoint = { x: event.data.global.x, y: event.data.global.y }
+      //   }
+      // })
 
-      app.renderer.plugins.interaction.on("touchend", (event) => {
-        dragFlag = false
-      })
+      // app.renderer.plugins.interaction.on("touchend", (event) => {
+      //   dragFlag = false
+      // })
 
 
       state = play;
@@ -156,7 +179,7 @@
 
           //随机y坐标在画布范围内
           // let y = randomInt(2, app.stage.height - 2 - blob.height);
-          let x = randomInt(2, app.stage.width - 2 - blob.width);
+          let x = randomInt(10, app.stage.width - blob.width);
 
 
           //设置车辆位置
@@ -349,6 +372,9 @@
 
           //如果是则判断为碰撞
           hit = true;
+          setTimeout(() => {
+            r2.visible = false
+          }, 200)
         } else {
 
           //否则为没碰撞
