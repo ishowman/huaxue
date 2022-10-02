@@ -48,8 +48,10 @@
     let dragFlag = false;
     let startPoint = {}
     let hitRecords = []
-    let lastHit = ''
+    let lastHit = {}
     let speed = 10
+
+    const gap = 60
 
 
 
@@ -60,6 +62,7 @@
     numberOfBlobs = 2;//初始化最大敌车数量
       score = 0;//初始化分数
       hp = 5;//初始化HP
+      shouldAddScore = true
 
           //加载素材图片
     loader
@@ -81,8 +84,10 @@
       bg = new TilingSprite(
         resources["img/bg.png"].texture
 )
-      bg.width = canvasWidth;
-      bg.height = canvasHeight;
+      bg.x=gap/4
+      bg.y=gap
+      bg.width = canvasWidth-gap/2;
+      bg.height = canvasHeight-1.5*gap;
       bg.tileScale.set(0.85, 1);
 
       // bg.y = -1*canvasHeight
@@ -113,7 +118,7 @@ scoreInfo = new Text(
       mycarSprite.width = 150;//自己的车宽度
       mycarSprite.height = 320;//高度
 
-      mycarSprite.position.set( (canvasWidth-mycarSprite.width)/2, canvasHeight-mycarSprite.height);//自己的车的初始位置
+      mycarSprite.position.set( (canvasWidth-mycarSprite.width)/2, canvasHeight-mycarSprite.height-gap/2);//自己的车的初始位置
       mycarSprite.vy = 0;//y轴加速度
       mycarSprite.vx = 0;//x轴加速度
       mycarSprite.invl = 0;//初始化无敌时间
@@ -187,6 +192,7 @@ scoreInfo = new Text(
         let blob = new Sprite(resources[blobsArr[randomInt(0, 4)]].texture);
         blob.width = 100;
         blob.height = 100;
+        blob.ts = new Date().getTime()
         let EMCarIsHit = true;
         while (EMCarIsHit) {
           //随机车子x坐标在画布外
@@ -247,13 +253,13 @@ scoreInfo = new Text(
       //移动敌人
       blobs.forEach(function (blob) {
 
-        //移动地方车辆
         // blob.x -= 5;
         blob.y += speed;
 
 
         //如果和我方车辆发生碰撞
         if (hitTestRectangle(mycarSprite, blob)) {
+          // console.log('blob', blob)
           explorerHit = true;
         }
       });
@@ -271,19 +277,23 @@ scoreInfo = new Text(
       }
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && mycarSprite.invl === 0) {
-        if (["img/coin.png", "img/prize.png"].includes(lastHit)) {
+        if (["img/coin.png", "img/prize.png"].includes(lastHit.url) && shouldAddScore) {
           // hp -= 1
           // document.getElementById('hp').innerHTML = String(hp);
           score += 100
           scoreInfo.text  = `Score:${score}`
 
-        } else {
+        } else if(["img/stone.png"].includes(lastHit.url)  && shouldAddScore){
           //车子图片变更为爆炸
           // mycarSprite.texture = resources["img/boom.png"].texture;
           //减血
+          if(score>10)score -= 10
+
           hp--;
           // document.getElementById('hp').innerHTML = String(hp);
           hpInfo.text =   `HP:${hp}`
+          scoreInfo.text  = `Score:${score}`
+
         }
         hitRecords.push(
           lastHit
@@ -319,7 +329,7 @@ scoreInfo = new Text(
           //从数组删除
           blobs.splice(i, 1);
           //从场景删除: 不知道为啥，加上 hp 的 text 对象后，这里会导致我的马儿消失了。怀疑是被判定为不在视图内因此删除了
-          // gameScene.removeChildAt(i + 2);
+          gameScene.removeChildAt(i + 4);
         }
       }
     }
@@ -408,12 +418,18 @@ scoreInfo = new Text(
         hit = false;
       }
 
-      if (hit) {
+      if (hit && r2.texture.textureCacheIds.length) {
+        console.log('r2', r2)
         // hitRecords.push(
         //   r2.texture.textureCacheIds[0]
         // )
         // document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
-        lastHit = r2.texture.textureCacheIds[0]
+        shouldAddScore = r2.ts === lastHit.ts && lastHit.url === r2.texture.textureCacheIds[0]
+        
+        lastHit = {
+          url: r2.texture.textureCacheIds[0],
+          ts: r2.ts
+        }
       }
 
       //传是否碰撞
