@@ -19,12 +19,13 @@
   <p><span>HP：</span><span id="hp"></span></p> -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script> -->
   <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script>
-  <script>
+  <script >
     let Application = PIXI.Application,
       Container = PIXI.Container,
       // loader = PIXI.loader,
       // resources = PIXI.loader.resources,
-      resources
+      resources,
+      AnimatedSprite = PIXI.AnimatedSprite,
       Graphics = PIXI.Graphics,
       TextureCache = PIXI.utils.TextureCache,
       Sprite = PIXI.Sprite,
@@ -50,8 +51,8 @@
     let dragFlag = false;
     let startPoint = {}
     let hitRecords = []
-    let lastHit = {}
-    initalSpeed = 15
+    let lastHit = {};
+    let initalSpeed = 15
     let speed = initalSpeed
 
     const gap = 50
@@ -59,11 +60,13 @@
 
 
     //设置要用到的变量
-    let state, gameScene, gameOverScene, message, bg, mycarSprite, blobs, numberOfBlobs, score, hp;
+    let state, gameScene, gameOverScene, message, bg, mycarSprite, blobs, numberOfBlobs, score, hp, runningHorse;
     numberOfBlobs = 2;//初始化最大敌车数量
+
     score = 0;//初始化分数
     hp = 3;//初始化HP
     shouldAddScore = true
+    const horseCourt = 20;
 
     //加载素材图片
     app.loader
@@ -73,8 +76,13 @@
       .add(`prize`, "img/prize.png")
       .add(`myHorse`, "img/myHorse.png")
       .add(`outerBg`, "img/outer-bg.png")
-      .add(`info`, "img/info.png")
-      .load((_loader, _resources) => {
+      .add(`info`, "img/info.png");
+
+      for(let i=1;i<=horseCourt;i++) {
+        app.loader.add(`horse${i}`, `horse/ld${i}.png`)
+      }
+
+      app.loader.load((_loader, _resources) => {
         resources = _resources
         setup(_resources)
       });
@@ -134,38 +142,60 @@
 
 
       //设置自己的车
-      mycarSprite = new Sprite(resources.myHorse.texture);
-      mycarSprite.width = 250;//自己的车宽度
-      mycarSprite.height = 500;//高度
+      // mycarSprite = new Sprite(resources.myHorse.texture);
+      // mycarSprite.width = 250;//自己的车宽度
+      // mycarSprite.height = 500;//高度
 
-      mycarSprite.position.set((canvasWidth - mycarSprite.width) / 2, canvasHeight - mycarSprite.height - gap / 2);//自己的车的初始位置
-      mycarSprite.vy = 0;//y轴加速度
-      mycarSprite.vx = 0;//x轴加速度
-      mycarSprite.invl = 0;//初始化无敌时间
-      // let horse = PIXI.Sprite.from('img/myHorse.png');
-      mycarSprite.interactive = true;
-      // mycarSprite.buttonMode = true;
+      // mycarSprite.position.set((canvasWidth - mycarSprite.width) / 2, canvasHeight );//自己的车的初始位置
+      // mycarSprite.vy = 0;//y轴加速度
+      // mycarSprite.vx = 0;//x轴加速度
+      // mycarSprite.invl = 0;//初始化无敌时间
 
-      mycarSprite.on("touchstart", (event) => {
-        dragFlag = true
-        startPoint = { x: event.data.global.x, y: event.data.global.y }
-      })
 
-      mycarSprite.on("touchmove", (event) => {
-        if (dragFlag) {
-          const dx = event.data.global.x - startPoint.x;
-          // const dy = event.data.global.y - startPoint.y;
-          mycarSprite.x += dx;
-          // mycarSprite.y += dy;
-          startPoint = { x: event.data.global.x, y: event.data.global.y }
-        }
-      })
+       runningHorse = new AnimatedSprite(
+        new Array(horseCourt).fill(0).map((item, i) => {
+          return resources[`horse${i+1}`].texture
+        })
+      )
+      runningHorse.animationSpeed = 0.3
+      runningHorse.width = 250;//自己的车宽度
+      runningHorse.height = 500;//高度
+      runningHorse.vy = 0;//y轴加速度
+      runningHorse.vx = 0;//x轴加速度
+      runningHorse.invl = 0;//初始化无敌时间
 
-      mycarSprite.on("touchend", (event) => {
-        dragFlag = false
-      })
+      runningHorse.position.set((canvasWidth - runningHorse.width) / 2, canvasHeight - runningHorse.height - gap / 2);//自己的车的初始位置
 
-      gameScene.addChild(mycarSprite);
+      runningHorse.loop = true;
+      runningHorse.gotoAndPlay(0);
+
+      runningHorse.interactive = true;
+
+      runningHorse.on("touchstart", (event) => {
+  dragFlag = true
+  startPoint = { x: event.data.global.x, y: event.data.global.y }
+})
+
+runningHorse.on("touchmove", (event) => {
+  if (dragFlag) {
+    const dx = event.data.global.x - startPoint.x;
+    // const dy = event.data.global.y - startPoint.y;
+    runningHorse.x += dx;
+    // mycarSprite.y += dy;
+    startPoint = { x: event.data.global.x, y: event.data.global.y }
+  }
+})
+
+runningHorse.on("touchend", (event) => {
+  dragFlag = false
+})
+
+
+      gameScene.addChild(runningHorse);
+
+      
+
+
 
 
       //一个存地方车辆的数组
@@ -260,13 +290,13 @@
       // }
       bg.tilePosition.y += 10;
       //移动赛车
-      mycarSprite.x += mycarSprite.vx;
-      mycarSprite.y += mycarSprite.vy;
-      if (mycarSprite.invl > 0) {
-        mycarSprite.invl--;
+      runningHorse.x += runningHorse.vx;
+      runningHorse.y += runningHorse.vy;
+      if (runningHorse.invl > 0) {
+        runningHorse.invl--;
       }
       //判断车辆是否超出画布
-      keepInScreen(mycarSprite, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
+      keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
       creatEMCar(resources);
       let explorerHit = false;
@@ -278,7 +308,7 @@
 
 
         //如果和我方车辆发生碰撞
-        if (hitTestRectangle(mycarSprite, blob)) {
+        if (hitTestRectangle(runningHorse, blob)) {
           explorerHit = true;
         }
       });
@@ -296,7 +326,7 @@
         }
       }
       //如果发生碰撞且在无敌时间之外
-      if (explorerHit && mycarSprite.invl === 0) {
+      if (explorerHit && runningHorse.invl === 0) {
         if (["coin", "prize"].includes(lastHit.url) && shouldAddScore) {
           // hp -= 1
           // document.getElementById('hp').innerHTML = String(hp);
@@ -331,7 +361,7 @@
      获得分数： ${score}
     `;
         }
-        mycarSprite.invl = 30//设置无敌时间
+        runningHorse.invl = 30//设置无敌时间
 
       }
       // else if (mycarSprite.invl <= 0) {//如果不在无敌时间内
