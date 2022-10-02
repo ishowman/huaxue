@@ -18,7 +18,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
   <script>
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // document.addEventListener('DOMContentLoaded', () => {
           //别名
     let Application = PIXI.Application,
       Container = PIXI.Container,
@@ -27,6 +27,7 @@
       Graphics = PIXI.Graphics,
       TextureCache = PIXI.utils.TextureCache,
       Sprite = PIXI.Sprite,
+      TilingSprite = PIXI.extras.TilingSprite,
       Text = PIXI.Text,
       TextStyle = PIXI.TextStyle;
       console.log(' window.innerHeight',  window.innerHeight)
@@ -41,7 +42,7 @@
       // resizeTo: window,                      
       antialiasing: true,
       transparent: false,
-      resolution: 1
+      // resolution: 1
     }
     );
     let dragFlag = false;
@@ -51,9 +52,16 @@
     let speed = 10
 
 
+
     //将pixi插入文档
     document.body.appendChild(app.view);
-    //加载素材图片
+    //设置要用到的变量
+    let state, gameScene, gameOverScene, message, bg, mycarSprite, blobs, numberOfBlobs, score, hp;
+    numberOfBlobs = 2;//初始化最大敌车数量
+      score = 0;//初始化分数
+      hp = 5;//初始化HP
+
+          //加载素材图片
     loader
       .add("img/bg.png")
       .add("img/coin.png")
@@ -61,23 +69,27 @@
       .add("img/prize.png")
       .add("img/myHorse.png")
       .load(setup);
-    //设置要用到的变量
-    let state, gameScene, gameOverScene, message, bg, mycarSprite, blobs, numberOfBlobs, score, hp;
+
     function setup() {
-      numberOfBlobs = 2;//初始化最大敌车数量
-      score = 0;//初始化分数
-      hp = 5;//初始化HP
 
 
       //设置游戏场景容器
       gameScene = new Container();
       app.stage.addChild(gameScene);
       //设置背景
-      bg = new Sprite(resources["img/bg.png"].texture);
+      // bg = new Sprite(resources["img/bg.png"].texture);
+      bg = new TilingSprite(
+        resources["img/bg.png"].texture
+)
       bg.width = canvasWidth;
-      bg.height = canvasHeight*2;
-      bg.y = -1*canvasHeight
+      bg.height = canvasHeight;
+      bg.tileScale.set(0.85, 1);
+
+      // bg.y = -1*canvasHeight
+      // bg.y = 0
+
       gameScene.addChild(bg);
+
 // hp info
 hpInfo = new Text(
       `HP:${hp}`, 
@@ -216,10 +228,11 @@ scoreInfo = new Text(
     }
     function play(delta) {
       //背景移动
-      bg.y += 1;
-      if (bg.y>= speed) {
-        bg.y = -1*canvasHeight;
-      }
+      // bg.y += 10;
+      // if (bg.y> canvasHeight-10) {
+      //   bg.y = -1*canvasHeight;
+      // }
+      bg.tilePosition.y += 10;
       //移动赛车
       mycarSprite.x += mycarSprite.vx;
       mycarSprite.y += mycarSprite.vy;
@@ -412,6 +425,6 @@ scoreInfo = new Text(
       gameOverScene.visible = true;
     }
 
-    })
+    // })
   </script>
 </body>
