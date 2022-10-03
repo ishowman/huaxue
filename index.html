@@ -15,15 +15,10 @@
 </style>
 
 <body style="font-size: 30px;">
-  <!-- <p><span>分数：</span><span id="score"></span></p>
-  <p><span>HP：</span><span id="hp"></span></p> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script> -->
   <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script>
   <script>
     let Application = PIXI.Application,
       Container = PIXI.Container,
-      // loader = PIXI.loader,
-      // resources = PIXI.loader.resources,
       resources,
       AnimatedSprite = PIXI.AnimatedSprite,
       Graphics = PIXI.Graphics,
@@ -87,30 +82,6 @@
     });
 
     function setup(resources) {
-
-      //       //创建一个游戏结束的场景
-      //       gameOverScene = new Container();
-      // app.stage.addChild(gameOverScene);
-
-      // //先让游戏结束场景隐藏
-      // // gameOverScene.visible = false;
-
-      // //设置一个默认字体
-      // let style = new TextStyle({
-      //   "wordWrap": true,
-      //   "align": "center",
-      //   "fill": "#d6ac5a",
-      //   "fontSize": 60
-      // });
-      // message = new Text("???", style);
-      // message.y = canvasHeight / 2 - 50;
-      // message.x = canvasWidth / 2;
-      // //字体中心点用于居中
-      // message.anchor.set(0.5, 0.5)
-      // gameOverScene.addChild(message);
-
-
-
 
       //设置游戏场景容器
       gameScene = new Container();
@@ -179,17 +150,6 @@
       gameScene.addChild(scoreInfo);
 
 
-      //设置自己的车
-      // mycarSprite = new Sprite(resources.myHorse.texture);
-      // mycarSprite.width = 250;//自己的车宽度
-      // mycarSprite.height = 500;//高度
-
-      // mycarSprite.position.set((canvasWidth - mycarSprite.width) / 2, canvasHeight );//自己的车的初始位置
-      // mycarSprite.vy = 0;//y轴加速度
-      // mycarSprite.vx = 0;//x轴加速度
-      // mycarSprite.invl = 0;//初始化无敌时间
-
-
       runningHorse = new AnimatedSprite(
         new Array(horseCourt).fill(0).map((item, i) => {
           return resources[`horse${i + 1}`].texture
@@ -230,10 +190,6 @@
 
 
       gameScene.addChild(runningHorse);
-
-
-
-
 
 
       //一个存地方车辆的数组
@@ -353,8 +309,6 @@
       //去除已经行驶到画布外的敌军车辆
       removeEmCar();
       //加分
-      // score += 1;
-      // document.getElementById('score').innerHTML = String(score);
       //如果分数大于200则每1000分场景车辆+1，最多八辆
       if (score > 30) {
         numberOfBlobs = 2 + Math.floor(score / 50);
@@ -366,8 +320,6 @@
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && runningHorse.invl === 0) {
         if (["coin", "prize"].includes(lastHit.url) && shouldAddScore) {
-          // hp -= 1
-          // document.getElementById('hp').innerHTML = String(hp);
           score += 10
           scoreInfo.text = `${score}`
 
@@ -387,8 +339,6 @@
         hitRecords.push(
           lastHit
         )
-        // document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
-
 
 
         //判断是否血量归零
@@ -402,12 +352,6 @@
         runningHorse.invl = 30//设置无敌时间
 
       }
-      // else if (mycarSprite.invl <= 0) {//如果不在无敌时间内
-      //   //车辆贴图变回去
-      //   mycarSprite.texture = resources["img/mycar.png"].texture;
-      // } else {//其他情况
-      //   mycarSprite.texture = resources["img/mycar.png"].texture;
-      // }
     }
     //移除已经行驶到画布外围的敌方车辆
     function removeEmCar() {
