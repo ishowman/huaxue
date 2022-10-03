@@ -19,7 +19,7 @@
   <p><span>HP：</span><span id="hp"></span></p> -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script> -->
   <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script>
-  <script >
+  <script>
     let Application = PIXI.Application,
       Container = PIXI.Container,
       // loader = PIXI.loader,
@@ -33,7 +33,6 @@
       Text = PIXI.Text,
       TextStyle = PIXI.TextStyle;
     let canvasWidth = window.innerWidth,
-      // canvasHeight = 1500;
       canvasHeight = window.innerHeight;
 
     //创建一个pixi应用
@@ -78,26 +77,65 @@
       .add(`outerBg`, "img/outer-bg.png")
       .add(`info`, "img/info.png");
 
-      for(let i=1;i<=horseCourt;i++) {
-        app.loader.add(`horse${i}`, `horse/ld${i}.png`)
-      }
+    for (let i = 1; i <= horseCourt; i++) {
+      app.loader.add(`horse${i}`, `horse/ld${i}.png`)
+    }
 
-      app.loader.load((_loader, _resources) => {
-        resources = _resources
-        setup(_resources)
-      });
+    app.loader.load((_loader, _resources) => {
+      resources = _resources
+      setup(_resources)
+    });
 
     function setup(resources) {
+
+      //       //创建一个游戏结束的场景
+      //       gameOverScene = new Container();
+      // app.stage.addChild(gameOverScene);
+
+      // //先让游戏结束场景隐藏
+      // // gameOverScene.visible = false;
+
+      // //设置一个默认字体
+      // let style = new TextStyle({
+      //   "wordWrap": true,
+      //   "align": "center",
+      //   "fill": "#d6ac5a",
+      //   "fontSize": 60
+      // });
+      // message = new Text("???", style);
+      // message.y = canvasHeight / 2 - 50;
+      // message.x = canvasWidth / 2;
+      // //字体中心点用于居中
+      // message.anchor.set(0.5, 0.5)
+      // gameOverScene.addChild(message);
+
+
 
 
       //设置游戏场景容器
       gameScene = new Container();
+      gameScene.visible = false;
       app.stage.addChild(gameScene);
       //设置背景
       outerBg = new Sprite(resources.outerBg.texture);
       outerBg.width = canvasWidth;
       outerBg.height = canvasHeight;
       gameScene.addChild(outerBg);
+
+      let preScene = new Container();
+      app.stage.addChild(preScene);
+
+      const point = new Graphics();
+      point.beginFill(0x0bef47)
+      point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
+      point.endFill()
+      point.interactive = true;//响应交互
+      point.buttonMode = true;
+      point.on("pointerdown", () => {
+        preScene.visible = false
+        gameScene.visible = true
+      })
+      preScene.addChild(point)
 
 
 
@@ -152,9 +190,9 @@
       // mycarSprite.invl = 0;//初始化无敌时间
 
 
-       runningHorse = new AnimatedSprite(
+      runningHorse = new AnimatedSprite(
         new Array(horseCourt).fill(0).map((item, i) => {
-          return resources[`horse${i+1}`].texture
+          return resources[`horse${i + 1}`].texture
         })
       )
       runningHorse.animationSpeed = 0.3
@@ -172,28 +210,28 @@
       runningHorse.interactive = true;
 
       runningHorse.on("touchstart", (event) => {
-  dragFlag = true
-  startPoint = { x: event.data.global.x, y: event.data.global.y }
-})
+        dragFlag = true
+        startPoint = { x: event.data.global.x, y: event.data.global.y }
+      })
 
-runningHorse.on("touchmove", (event) => {
-  if (dragFlag) {
-    const dx = event.data.global.x - startPoint.x;
-    // const dy = event.data.global.y - startPoint.y;
-    runningHorse.x += dx;
-    // mycarSprite.y += dy;
-    startPoint = { x: event.data.global.x, y: event.data.global.y }
-  }
-})
+      runningHorse.on("touchmove", (event) => {
+        if (dragFlag) {
+          const dx = event.data.global.x - startPoint.x;
+          // const dy = event.data.global.y - startPoint.y;
+          runningHorse.x += dx;
+          // mycarSprite.y += dy;
+          startPoint = { x: event.data.global.x, y: event.data.global.y }
+        }
+      })
 
-runningHorse.on("touchend", (event) => {
-  dragFlag = false
-})
+      runningHorse.on("touchend", (event) => {
+        dragFlag = false
+      })
 
 
       gameScene.addChild(runningHorse);
 
-      
+
 
 
 
@@ -201,7 +239,7 @@ runningHorse.on("touchend", (event) => {
       //一个存地方车辆的数组
       blobs = [];
 
-      //创建一个游戏结束的场景
+      // //创建一个游戏结束的场景
       gameOverScene = new Container();
       app.stage.addChild(gameOverScene);
 
@@ -217,7 +255,7 @@ runningHorse.on("touchend", (event) => {
       });
       message = new Text("", style);
       message.y = canvasHeight / 2 - 50;
-      message.x = app.stage.width / 2;
+      message.x = canvasWidth / 2;
       //字体中心点用于居中
       message.anchor.set(0.5, 0.5)
       gameOverScene.addChild(message);
