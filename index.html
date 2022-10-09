@@ -182,41 +182,41 @@
           return resources[`horse${i + 1}`].texture
         })
       )
-      runningHorse.animationSpeed = 0.3
-      runningHorse.width = 250;//自己的车宽度
-      runningHorse.height = 500;//高度
-      runningHorse.vy = 0;//y轴加速度
-      runningHorse.vx = 0;//x轴加速度
-      runningHorse.invl = 0;//初始化无敌时间
+      // runningHorse.animationSpeed = 0.3
+      // runningHorse.width = 250;//自己的车宽度
+      // runningHorse.height = 500;//高度
+      // runningHorse.vy = 0;//y轴加速度
+      // runningHorse.vx = 0;//x轴加速度
+      // runningHorse.invl = 0;//初始化无敌时间
 
-      runningHorse.position.set((canvasWidth - runningHorse.width) / 2, canvasHeight - runningHorse.height - gap / 2);//自己的车的初始位置
+      // runningHorse.position.set((canvasWidth - runningHorse.width) / 2, canvasHeight - runningHorse.height - gap / 2);//自己的车的初始位置
 
-      runningHorse.loop = true;
-      runningHorse.gotoAndPlay(0);
+      // runningHorse.loop = true;
+      // runningHorse.gotoAndPlay(0);
 
-      runningHorse.interactive = true;
+      // runningHorse.interactive = true;
 
-      runningHorse.on("touchstart", (event) => {
-        dragFlag = true
-        startPoint = { x: event.data.global.x, y: event.data.global.y }
-      })
+      // runningHorse.on("touchstart", (event) => {
+      //   dragFlag = true
+      //   startPoint = { x: event.data.global.x, y: event.data.global.y }
+      // })
 
-      runningHorse.on("touchmove", (event) => {
-        if (dragFlag) {
-          const dx = event.data.global.x - startPoint.x;
-          // const dy = event.data.global.y - startPoint.y;
-          runningHorse.x += dx;
-          // mycarSprite.y += dy;
-          startPoint = { x: event.data.global.x, y: event.data.global.y }
-        }
-      })
+      // runningHorse.on("touchmove", (event) => {
+      //   if (dragFlag) {
+      //     const dx = event.data.global.x - startPoint.x;
+      //     // const dy = event.data.global.y - startPoint.y;
+      //     runningHorse.x += dx;
+      //     // mycarSprite.y += dy;
+      //     startPoint = { x: event.data.global.x, y: event.data.global.y }
+      //   }
+      // })
 
-      runningHorse.on("touchend", (event) => {
-        dragFlag = false
-      })
+      // runningHorse.on("touchend", (event) => {
+      //   dragFlag = false
+      // })
 
 
-      gameScene.addChild(runningHorse);
+      // gameScene.addChild(runningHorse);
 
 
       //一个存地方车辆的数组
@@ -319,20 +319,20 @@
       //背景移动
       bg.tilePosition.y += 10;
       //移动赛车
-      runningHorse.x += runningHorse.vx;
-      runningHorse.y += runningHorse.vy;
-      if (runningHorse.invl > 0) {
-        runningHorse.invl--;
-      }
+      // runningHorse.x += runningHorse.vx;
+      // runningHorse.y += runningHorse.vy;
+      // if (runningHorse.invl > 0) {
+      //   runningHorse.invl--;
+      // }
       //判断车辆是否超出画布
-      keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
+      // keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
       creatEMCar(resources);
       let explorerHit = false;
       //移动敌人
       blobs.forEach(function (blob) {
 
-        // blob.y += speed;
+        blob.y += speed;
 
 
         //如果和我方车辆发生碰撞
