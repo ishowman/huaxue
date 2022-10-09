@@ -70,6 +70,9 @@
       .add(`prize`, "img/prize.png")
       .add(`myHorse`, "img/myHorse.png")
       .add(`outerBg`, "img/outer-bg.png")
+      .add(`preBg`, "index/bg.png")
+      .add(`playBtn`, "index/play-btn.png")
+
       .add(`info`, "img/info.png");
 
     for (let i = 1; i <= horseCourt; i++) {
@@ -98,17 +101,36 @@
       let preScene = new Container();
       app.stage.addChild(preScene);
 
-      const point = new Graphics();
-      point.beginFill(0x0bef47)
-      point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
-      point.endFill()
-      point.interactive = true;//响应交互
-      point.buttonMode = true;
-      point.on("pointerdown", () => {
+      preBg = new Sprite(resources.preBg.texture);
+      preBg.width = canvasWidth;
+      preBg.height = canvasHeight;
+      preScene.addChild(preBg);
+
+      playBtn = new Sprite(resources.playBtn.texture);
+      playBtn.width = canvasWidth-20;
+      playBtn.height = 400;
+      playBtn.y = canvasHeight - 660;
+      playBtn.x = 20;
+      playBtn.interactive = true;//响应交互
+      playBtn.on("pointerdown", () => {
         preScene.visible = false
         gameScene.visible = true
       })
-      preScene.addChild(point)
+
+      preScene.addChild(playBtn);
+
+
+      // const point = new Graphics();
+      // point.beginFill(0x0bef47)
+      // point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
+      // point.endFill()
+      // point.interactive = true;//响应交互
+      // point.buttonMode = true;
+      // point.on("pointerdown", () => {
+      //   preScene.visible = false
+      //   gameScene.visible = true
+      // })
+      // preScene.addChild(point)
 
 
       bg = new TilingSprite(
@@ -204,6 +226,18 @@
       gameOverScene = new Container();
       app.stage.addChild(gameOverScene);
 
+      gameOverScene.x = 100;
+      gameOverScene.y = 400;
+      gameOverScene.width = canvasWidth - 200;
+
+      gameOverScene.height = canvasHeight - 500;
+
+      const gameOverBg = new Sprite(resources.preBg.texture);
+      gameOverBg.width = canvasWidth - 200;
+      gameOverBg.height = canvasHeight - 500;
+      gameOverScene.addChild(gameOverBg);
+
+
       //先让游戏结束场景隐藏
       gameOverScene.visible = false;
 
@@ -212,7 +246,7 @@
         "wordWrap": true,
         "align": "center",
         "fill": "#d6ac5a",
-        "fontSize": 60
+        "fontSize": 60,
       });
       message = new Text("", style);
       message.y = canvasHeight / 2 - 50;
@@ -283,10 +317,6 @@
     }
     function play(delta) {
       //背景移动
-      // bg.y += 10;
-      // if (bg.y> canvasHeight-10) {
-      //   bg.y = -1*canvasHeight;
-      // }
       bg.tilePosition.y += 10;
       //移动赛车
       runningHorse.x += runningHorse.vx;
@@ -297,7 +327,7 @@
       //判断车辆是否超出画布
       keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
-      creatEMCar(resources);
+      // creatEMCar(resources);
       let explorerHit = false;
       //移动敌人
       blobs.forEach(function (blob) {
@@ -347,7 +377,7 @@
 
 
         //判断是否血量归零
-        if (hp < 1) {
+        if (hp < 3) {
           //抛出游戏结束
           state = end;
           message.text = `
@@ -368,7 +398,8 @@
           blobs.splice(i, 1);
           //从场景删除: gameScene 调用 addChild 后记得更改这里的值
           gameScene.removeChildAt(i + 2);
-          console.log('children', gameScene.children)
+          // console.log('children', gameScene.children)
+          
         }
       }
     }
@@ -469,7 +500,7 @@
     };
     //游戏结束显示游戏结束场景，隐藏游戏场景
     function end() {
-      gameScene.visible = false;
+      // gameScene.visible = false;
       gameOverScene.visible = true;
     }
 
