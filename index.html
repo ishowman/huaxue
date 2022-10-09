@@ -327,13 +327,12 @@
       //判断车辆是否超出画布
       keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
-      // creatEMCar(resources);
+      creatEMCar(resources);
       let explorerHit = false;
       //移动敌人
       blobs.forEach(function (blob) {
 
-        // blob.x -= 5;
-        blob.y += speed;
+        // blob.y += speed;
 
 
         //如果和我方车辆发生碰撞
