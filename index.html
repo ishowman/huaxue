@@ -15,15 +15,12 @@
 </style>
 
 <body style="font-size: 30px;">
-  <!-- <p><span>分数：</span><span id="score"></span></p>
-  <p><span>HP：</span><span id="hp"></span></p> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script> -->
-  <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script>
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js-legacy@6.5.5/dist/browser/pixi-legacy.min.js"></script>
+
   <script>
     let Application = PIXI.Application,
       Container = PIXI.Container,
-      // loader = PIXI.loader,
-      // resources = PIXI.loader.resources,
       resources,
       AnimatedSprite = PIXI.AnimatedSprite,
       Graphics = PIXI.Graphics,
@@ -43,6 +40,7 @@
       antialiasing: true,
       // transparent: false,
       // resolution: 1
+      forceCanvas: true, 
     }
     );
     document.body.appendChild(app.view);
@@ -75,6 +73,9 @@
       .add(`prize`, "img/prize.png")
       .add(`myHorse`, "img/myHorse.png")
       .add(`outerBg`, "img/outer-bg.png")
+      .add(`preBg`, "index/bg.png")
+      .add(`playBtn`, "index/play-btn.png")
+
       .add(`info`, "img/info.png");
 
     for (let i = 1; i <= horseCourt; i++) {
@@ -88,56 +89,51 @@
 
     function setup(resources) {
 
-      //       //创建一个游戏结束的场景
-      //       gameOverScene = new Container();
-      // app.stage.addChild(gameOverScene);
-
-      // //先让游戏结束场景隐藏
-      // // gameOverScene.visible = false;
-
-      // //设置一个默认字体
-      // let style = new TextStyle({
-      //   "wordWrap": true,
-      //   "align": "center",
-      //   "fill": "#d6ac5a",
-      //   "fontSize": 60
-      // });
-      // message = new Text("???", style);
-      // message.y = canvasHeight / 2 - 50;
-      // message.x = canvasWidth / 2;
-      // //字体中心点用于居中
-      // message.anchor.set(0.5, 0.5)
-      // gameOverScene.addChild(message);
-
-
-
-
       //设置游戏场景容器
       gameScene = new Container();
       gameScene.visible = false;
+      gameScene.sortableChildren = true
       app.stage.addChild(gameScene);
       //设置背景
       outerBg = new Sprite(resources.outerBg.texture);
       outerBg.width = canvasWidth;
       outerBg.height = canvasHeight;
+      outerBg.zIndex = 9;
       gameScene.addChild(outerBg);
 
       let preScene = new Container();
       app.stage.addChild(preScene);
 
-      const point = new Graphics();
-      point.beginFill(0x0bef47)
-      point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
-      point.endFill()
-      point.interactive = true;//响应交互
-      point.buttonMode = true;
-      point.on("pointerdown", () => {
+      preBg = new Sprite(resources.preBg.texture);
+      preBg.width = canvasWidth;
+      preBg.height = canvasHeight;
+      preScene.addChild(preBg);
+
+      playBtn = new Sprite(resources.playBtn.texture);
+      playBtn.width = canvasWidth-20;
+      playBtn.height = 400;
+      playBtn.y = canvasHeight - 660;
+      playBtn.x = 20;
+      playBtn.interactive = true;//响应交互
+      playBtn.on("pointerdown", () => {
         preScene.visible = false
         gameScene.visible = true
       })
-      preScene.addChild(point)
+
+      preScene.addChild(playBtn);
 
 
+      // const point = new Graphics();
+      // point.beginFill(0x0bef47)
+      // point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
+      // point.endFill()
+      // point.interactive = true;//响应交互
+      // point.buttonMode = true;
+      // point.on("pointerdown", () => {
+      //   preScene.visible = false
+      //   gameScene.visible = true
+      // })
+      // preScene.addChild(point)
 
 
       bg = new TilingSprite(
@@ -147,17 +143,19 @@
       bg.y = 140
       bg.width = canvasWidth - gap;
       bg.height = canvasHeight - 160;
-      bg.tileScale.set(0.85, 1);
+      bg.tileScale.set(0.8, 1);
 
       gameScene.addChild(bg);
 
       // 分数
       infoBar = new Sprite(resources.info.texture);
       infoBar.x = gap / 2;
-      infoBar.y = 40
+      infoBar.y = 80;
 
       infoBar.width = canvasWidth - gap;
       infoBar.height = 200;
+      infoBar.zIndex = 99;
+
       gameScene.addChild(infoBar);
 
 
@@ -167,27 +165,19 @@
         { fontSize: "50px", "fill": "#d6ac5a", }
       );
       hpInfo.x = canvasWidth - 400;
-      hpInfo.y = 145;
+      hpInfo.y = 185;
+      hpInfo.zIndex = 100;
+
       gameScene.addChild(hpInfo);
-      // hp info
+      // score info
       scoreInfo = new Text(
         `${score}`,
         { fontSize: "60px", "fill": "#d6ac5a", }
       );
       scoreInfo.x = 350;
-      scoreInfo.y = 145;
+      scoreInfo.y = 185;
+      scoreInfo.zIndex = 100;
       gameScene.addChild(scoreInfo);
-
-
-      //设置自己的车
-      // mycarSprite = new Sprite(resources.myHorse.texture);
-      // mycarSprite.width = 250;//自己的车宽度
-      // mycarSprite.height = 500;//高度
-
-      // mycarSprite.position.set((canvasWidth - mycarSprite.width) / 2, canvasHeight );//自己的车的初始位置
-      // mycarSprite.vy = 0;//y轴加速度
-      // mycarSprite.vx = 0;//x轴加速度
-      // mycarSprite.invl = 0;//初始化无敌时间
 
 
       runningHorse = new AnimatedSprite(
@@ -232,16 +222,24 @@
       gameScene.addChild(runningHorse);
 
 
-
-
-
-
       //一个存地方车辆的数组
       blobs = [];
 
       // //创建一个游戏结束的场景
       gameOverScene = new Container();
       app.stage.addChild(gameOverScene);
+
+      gameOverScene.x = 100;
+      gameOverScene.y = 400;
+      gameOverScene.width = canvasWidth - 200;
+
+      gameOverScene.height = canvasHeight - 500;
+
+      const gameOverBg = new Sprite(resources.preBg.texture);
+      gameOverBg.width = canvasWidth - 200;
+      gameOverBg.height = canvasHeight - 500;
+      gameOverScene.addChild(gameOverBg);
+
 
       //先让游戏结束场景隐藏
       gameOverScene.visible = false;
@@ -251,7 +249,7 @@
         "wordWrap": true,
         "align": "center",
         "fill": "#d6ac5a",
-        "fontSize": 60
+        "fontSize": 60,
       });
       message = new Text("", style);
       message.y = canvasHeight / 2 - 50;
@@ -322,17 +320,13 @@
     }
     function play(delta) {
       //背景移动
-      // bg.y += 10;
-      // if (bg.y> canvasHeight-10) {
-      //   bg.y = -1*canvasHeight;
-      // }
       bg.tilePosition.y += 10;
       //移动赛车
-      runningHorse.x += runningHorse.vx;
-      runningHorse.y += runningHorse.vy;
-      if (runningHorse.invl > 0) {
-        runningHorse.invl--;
-      }
+      // runningHorse.x += runningHorse.vx;
+      // runningHorse.y += runningHorse.vy;
+      // if (runningHorse.invl > 0) {
+      //   runningHorse.invl--;
+      // }
       //判断车辆是否超出画布
       keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
@@ -341,7 +335,6 @@
       //移动敌人
       blobs.forEach(function (blob) {
 
-        // blob.x -= 5;
         blob.y += speed;
 
 
@@ -353,8 +346,6 @@
       //去除已经行驶到画布外的敌军车辆
       removeEmCar();
       //加分
-      // score += 1;
-      // document.getElementById('score').innerHTML = String(score);
       //如果分数大于200则每1000分场景车辆+1，最多八辆
       if (score > 30) {
         numberOfBlobs = 2 + Math.floor(score / 50);
@@ -366,8 +357,6 @@
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && runningHorse.invl === 0) {
         if (["coin", "prize"].includes(lastHit.url) && shouldAddScore) {
-          // hp -= 1
-          // document.getElementById('hp').innerHTML = String(hp);
           score += 10
           scoreInfo.text = `${score}`
 
@@ -387,12 +376,10 @@
         hitRecords.push(
           lastHit
         )
-        // document.querySelector('#hit-records').innerText = JSON.stringify(hitRecords)
-
 
 
         //判断是否血量归零
-        if (hp < 1) {
+        if (hp < 3) {
           //抛出游戏结束
           state = end;
           message.text = `
@@ -402,12 +389,6 @@
         runningHorse.invl = 30//设置无敌时间
 
       }
-      // else if (mycarSprite.invl <= 0) {//如果不在无敌时间内
-      //   //车辆贴图变回去
-      //   mycarSprite.texture = resources["img/mycar.png"].texture;
-      // } else {//其他情况
-      //   mycarSprite.texture = resources["img/mycar.png"].texture;
-      // }
     }
     //移除已经行驶到画布外围的敌方车辆
     function removeEmCar() {
@@ -418,7 +399,9 @@
           //从数组删除
           blobs.splice(i, 1);
           //从场景删除: gameScene 调用 addChild 后记得更改这里的值
-          gameScene.removeChildAt(i + 6);
+          gameScene.removeChildAt(i + 2);
+          // console.log('children', gameScene.children)
+          
         }
       }
     }
@@ -519,7 +502,7 @@
     };
     //游戏结束显示游戏结束场景，隐藏游戏场景
     function end() {
-      gameScene.visible = false;
+      // gameScene.visible = false;
       gameOverScene.visible = true;
     }
 
