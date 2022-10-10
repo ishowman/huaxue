@@ -20,7 +20,8 @@
   // VConsole will be exported to `window.VConsole` by default.
   var vConsole = new window.VConsole();
 </script>
-  <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script>
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/pixi.js/6.5.5/browser/pixi.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js-legacy@6.5.5/dist/browser/pixi-legacy.min.js"></script>
   <script>
     let Application = PIXI.Application,
       Container = PIXI.Container,
@@ -43,6 +44,7 @@
       antialiasing: true,
       // transparent: false,
       // resolution: 1
+      forceCanvas: true,
     }
     );
     document.body.appendChild(app.view);
