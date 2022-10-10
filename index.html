@@ -72,6 +72,7 @@
       .add(`outerBg`, "img/outer-bg.png")
       .add(`preBg`, "index/bg.png")
       .add(`playBtn`, "index/play-btn.png")
+      .add(`bgCaodi`, "img/bg_caodi.png")
 
       .add(`info`, "img/info.png");
 
@@ -120,29 +121,26 @@
       preScene.addChild(playBtn);
 
 
-      // const point = new Graphics();
-      // point.beginFill(0x0bef47)
-      // point.drawCircle(canvasWidth / 2, canvasHeight - 100, 100)
-      // point.endFill()
-      // point.interactive = true;//响应交互
-      // point.buttonMode = true;
-      // point.on("pointerdown", () => {
-      //   preScene.visible = false
-      //   gameScene.visible = true
-      // })
-      // preScene.addChild(point)
-
-
-      bg = new TilingSprite(
-        resources.bg.texture
-      )
+      bg = new Sprite(resources.bgCaodi.texture);
+      bg.width = canvasWidth;
+      bg.height = canvasHeight*2;
       bg.x = gap / 2
-      bg.y = 140
-      bg.width = canvasWidth - gap;
-      bg.height = canvasHeight - 160;
-      bg.tileScale.set(0.8, 1);
-
+      // bg.y = 140
+      bg.y = -canvasHeight-25
       gameScene.addChild(bg);
+
+
+
+      // bg = new TilingSprite(
+      //   resources.bg.texture
+      // )
+      // bg.x = gap / 2
+      // bg.y = 140
+      // bg.width = canvasWidth - gap;
+      // bg.height = canvasHeight - 160;
+      // bg.tileScale.set(0.8, 1);
+
+      // gameScene.addChild(bg);
 
       // 分数
       infoBar = new Sprite(resources.info.texture);
@@ -317,7 +315,11 @@
     }
     function play(delta) {
       //背景移动
-      bg.tilePosition.y += 10;
+      // bg.tilePosition.y += 10;
+      bg.y += 5
+      if(bg.y>-30) {
+        bg.y = -canvasHeight -25
+      }
       //移动赛车
       // runningHorse.x += runningHorse.vx;
       // runningHorse.y += runningHorse.vy;
