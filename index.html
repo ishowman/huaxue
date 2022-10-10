@@ -78,6 +78,7 @@
       .add(`prize`, "img/prize.png")
       .add(`myHorse`, "img/myHorse.png")
       .add(`outerBg`, "img/outer-bg.png")
+      .add(`bgCaodi`, "img/bg_caodi.png")
       .add(`info`, "img/info.png");
 
     for (let i = 1; i <= horseCourt; i++) {
@@ -143,14 +144,21 @@
 
 
 
-      bg = new TilingSprite(
-        resources.bg.texture
-      )
+      // bg = new TilingSprite(
+      //   resources.bg.texture
+      // )
+      // bg.x = gap / 2
+      // bg.y = 140
+      // bg.width = canvasWidth - gap;
+      // bg.height = canvasHeight - 160;
+      // bg.tileScale.set(0.85, 1);
+
+      bg = new Sprite(resources.bgCaodi.texture);
+      bg.width = canvasWidth;
+      bg.height = canvasHeight*2;
       bg.x = gap / 2
-      bg.y = 140
-      bg.width = canvasWidth - gap;
-      bg.height = canvasHeight - 160;
-      bg.tileScale.set(0.85, 1);
+      // bg.y = 140
+      bg.y = -canvasHeight-25
 
       gameScene.addChild(bg);
 
@@ -325,11 +333,10 @@
     }
     function play(delta) {
       //背景移动
-      // bg.y += 10;
-      // if (bg.y> canvasHeight-10) {
-      //   bg.y = -1*canvasHeight;
-      // }
-      bg.tilePosition.y += 10;
+      bg.y += 10
+      if(bg.y>-30) {
+        bg.y = -canvasHeight -25
+      }  
       //移动赛车
       runningHorse.x += runningHorse.vx;
       runningHorse.y += runningHorse.vy;
