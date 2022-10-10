@@ -177,46 +177,46 @@
       gameScene.addChild(scoreInfo);
 
 
-      runningHorse = new AnimatedSprite(
-        new Array(horseCourt).fill(0).map((item, i) => {
-          return resources[`horse${i + 1}`].texture
-        })
-      )
-      runningHorse.animationSpeed = 0.3
-      runningHorse.width = 250;//自己的车宽度
-      runningHorse.height = 500;//高度
-      runningHorse.vy = 0;//y轴加速度
-      runningHorse.vx = 0;//x轴加速度
-      runningHorse.invl = 0;//初始化无敌时间
+      // runningHorse = new AnimatedSprite(
+      //   new Array(horseCourt).fill(0).map((item, i) => {
+      //     return resources[`horse${i + 1}`].texture
+      //   })
+      // )
+      // runningHorse.animationSpeed = 0.3
+      // runningHorse.width = 250;//自己的车宽度
+      // runningHorse.height = 500;//高度
+      // runningHorse.vy = 0;//y轴加速度
+      // runningHorse.vx = 0;//x轴加速度
+      // runningHorse.invl = 0;//初始化无敌时间
 
-      runningHorse.position.set((canvasWidth - runningHorse.width) / 2, canvasHeight - runningHorse.height - gap / 2);//自己的车的初始位置
+      // runningHorse.position.set((canvasWidth - runningHorse.width) / 2, canvasHeight - runningHorse.height - gap / 2);//自己的车的初始位置
 
-      runningHorse.loop = true;
-      runningHorse.gotoAndPlay(0);
+      // runningHorse.loop = true;
+      // runningHorse.gotoAndPlay(0);
 
-      runningHorse.interactive = true;
+      // runningHorse.interactive = true;
 
-      runningHorse.on("touchstart", (event) => {
-        dragFlag = true
-        startPoint = { x: event.data.global.x, y: event.data.global.y }
-      })
+      // runningHorse.on("touchstart", (event) => {
+      //   dragFlag = true
+      //   startPoint = { x: event.data.global.x, y: event.data.global.y }
+      // })
 
-      runningHorse.on("touchmove", (event) => {
-        if (dragFlag) {
-          const dx = event.data.global.x - startPoint.x;
-          // const dy = event.data.global.y - startPoint.y;
-          runningHorse.x += dx;
-          // mycarSprite.y += dy;
-          startPoint = { x: event.data.global.x, y: event.data.global.y }
-        }
-      })
+      // runningHorse.on("touchmove", (event) => {
+      //   if (dragFlag) {
+      //     const dx = event.data.global.x - startPoint.x;
+      //     // const dy = event.data.global.y - startPoint.y;
+      //     runningHorse.x += dx;
+      //     // mycarSprite.y += dy;
+      //     startPoint = { x: event.data.global.x, y: event.data.global.y }
+      //   }
+      // })
 
-      runningHorse.on("touchend", (event) => {
-        dragFlag = false
-      })
+      // runningHorse.on("touchend", (event) => {
+      //   dragFlag = false
+      // })
 
 
-      gameScene.addChild(runningHorse);
+      // gameScene.addChild(runningHorse);
 
 
       //一个存地方车辆的数组
@@ -303,14 +303,14 @@
       }
     }
     //检查生成的地方车辆是否有重叠
-    function checkEMCarPositionHit(blob) {
-      for (var i = 0; i < blobs.length; i++) {
-        if (hitTestRectangle(blob, blobs[i])) {
-          return true;
-          break;
-        }
-      }
-    }
+    // function checkEMCarPositionHit(blob) {
+    //   for (var i = 0; i < blobs.length; i++) {
+    //     if (hitTestRectangle(blob, blobs[i])) {
+    //       return true;
+    //       break;
+    //     }
+    //   }
+    // }
     function gameLoop(delta) {
       //更新游戏场景:
       state(delta);
@@ -325,82 +325,7 @@
       //   runningHorse.invl--;
       // }
       //判断车辆是否超出画布
-      keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
-      //设置敌人
-      creatEMCar(resources);
-      let explorerHit = false;
-      //移动敌人
-      blobs.forEach(function (blob) {
-
-        blob.y += speed;
-
-
-        //如果和我方车辆发生碰撞
-        if (hitTestRectangle(runningHorse, blob)) {
-          explorerHit = true;
-        }
-      });
-      //去除已经行驶到画布外的敌军车辆
-      removeEmCar();
-      //加分
-      //如果分数大于200则每1000分场景车辆+1，最多八辆
-      if (score > 30) {
-        numberOfBlobs = 2 + Math.floor(score / 50);
-        speed = initalSpeed + Math.floor(score / 50)
-        if (numberOfBlobs > 6) {
-          numberOfBlobs = 6;
-        }
-      }
-      //如果发生碰撞且在无敌时间之外
-      if (explorerHit && runningHorse.invl === 0) {
-        if (["coin", "prize"].includes(lastHit.url) && shouldAddScore) {
-          score += 10
-          scoreInfo.text = `${score}`
-
-        } else if (["stone"].includes(lastHit.url) && shouldAddScore) {
-          //车子图片变更为爆炸
-          // mycarSprite.texture = resources["img/boom.png"].texture;
-          //减血
-          if (score > 0) score -= 1
-
-          hp--;
-          speed = initalSpeed;
-          // document.getElementById('hp').innerHTML = String(hp);
-          hpInfo.text = `HP:${hp}`
-          scoreInfo.text = `${score}`
-
-        }
-        hitRecords.push(
-          lastHit
-        )
-
-
-        //判断是否血量归零
-        if (hp < 3) {
-          //抛出游戏结束
-          state = end;
-          message.text = `
-     获得分数： ${score}
-    `;
-        }
-        runningHorse.invl = 30//设置无敌时间
-
-      }
-    }
-    //移除已经行驶到画布外围的敌方车辆
-    function removeEmCar() {
-      for (var i = 0; i < blobs.length; i++) {
-        // if (blobs[i].x < -50) {
-        if (blobs[i].y > canvasHeight - 100) {
-
-          //从数组删除
-          blobs.splice(i, 1);
-          //从场景删除: gameScene 调用 addChild 后记得更改这里的值
-          gameScene.removeChildAt(i + 2);
-          // console.log('children', gameScene.children)
-          
-        }
-      }
+      // keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
     }
     //判断是否超出画布
     function keepInScreen(sprite, container) {
