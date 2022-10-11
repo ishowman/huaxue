@@ -143,7 +143,7 @@
       bg.y = 140
       bg.width = canvasWidth - gap;
       bg.height = canvasHeight - 160;
-      bg.tileScale.set(0.8, 1);
+      bg.tileScale.set(0.9, 1);
 
       gameScene.addChild(bg);
 
@@ -186,8 +186,8 @@
         })
       )
       runningHorse.animationSpeed = 0.3
-      runningHorse.width = 250;//自己的车宽度
-      runningHorse.height = 500;//高度
+      runningHorse.width = 300;//自己的车宽度
+      runningHorse.height = 600;//高度
       runningHorse.vy = 0;//y轴加速度
       runningHorse.vx = 0;//x轴加速度
       runningHorse.invl = 0;//初始化无敌时间
@@ -276,8 +276,8 @@
 
         //创建敌车
         let blob = new Sprite(resources[blobsArr[randomInt(0, 4)]].texture);
-        blob.width = 100;
-        blob.height = 100;
+        blob.width = 150;
+        blob.height = 150;
         blob.ts = new Date().getTime()
         let EMCarIsHit = true;
         while (EMCarIsHit) {
@@ -324,9 +324,9 @@
       //移动赛车
       // runningHorse.x += runningHorse.vx;
       // runningHorse.y += runningHorse.vy;
-      // if (runningHorse.invl > 0) {
-      //   runningHorse.invl--;
-      // }
+      if (runningHorse.invl > 0) {
+        runningHorse.invl--;
+      }
       //判断车辆是否超出画布
       keepInScreen(runningHorse, { x: 0, y: 2, width: canvasWidth, height: canvasHeight });
       //设置敌人
@@ -349,13 +349,17 @@
       //如果分数大于200则每1000分场景车辆+1，最多八辆
       if (score > 30) {
         numberOfBlobs = 2 + Math.floor(score / 50);
-        speed = initalSpeed + Math.floor(score / 50)
+        speed = initalSpeed + Math.floor(score / 20)
+        if(speed>25) {
+          speed = 25
+        }
         if (numberOfBlobs > 6) {
           numberOfBlobs = 6;
         }
       }
       //如果发生碰撞且在无敌时间之外
       if (explorerHit && runningHorse.invl === 0) {
+        console.log('lastHit.url', lastHit, shouldAddScore)
         if (["coin", "prize"].includes(lastHit.url) && shouldAddScore) {
           score += 10
           scoreInfo.text = `${score}`
@@ -379,7 +383,7 @@
 
 
         //判断是否血量归零
-        if (hp < 3) {
+        if (hp < 1) {
           //抛出游戏结束
           state = end;
           message.text = `
@@ -440,7 +444,7 @@
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     //碰撞检测
-    function hitTestRectangle(r1, r2) {
+    function hitTestRectangle(r1, r2, distance = 0) {
 
       //设置需要的变量
       let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
@@ -469,10 +473,10 @@
       combinedHalfHeights = r1.halfHeight + r2.halfHeight;
 
       //检查x轴是否充电
-      if (Math.abs(vx) < combinedHalfWidths) {
+      if (Math.abs(vx) < combinedHalfWidths+distance) {
 
         //再检查y轴
-        if (Math.abs(vy) < combinedHalfHeights) {
+        if (Math.abs(vy) < combinedHalfHeights+distance) {
 
           //如果是则判断为碰撞
           hit = true;
@@ -489,7 +493,7 @@
       }
 
       if (hit && r2.texture.textureCacheIds.length) {
-        shouldAddScore = r2.ts === lastHit.ts && lastHit.url === r2.texture.textureCacheIds[0]
+        shouldAddScore = !(r2.ts === lastHit.ts && lastHit.url === r2.texture.textureCacheIds[0])
 
         lastHit = {
           url: r2.texture.textureCacheIds[0],
